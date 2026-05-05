@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="../.gitattributes" />
+    <File Path="../.gitignore" />
+    <File Path="../azure-pipelines.yml" />
+    <File Path="../index.html" />
+    <File Path="../test.txt" />
+    <File Path="../Web1.slnx" />
+  </Folder>
+</Solution>
