@@ -19,4 +19,4 @@ steps:
     app_location: "/"              # where your site lives
     output_location: ""            # leave empty if no build output
     api_location: ""               # leave empty unless using API
-    azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN)
+    azure_static_web_apps_api_token: $(deployment_token)
