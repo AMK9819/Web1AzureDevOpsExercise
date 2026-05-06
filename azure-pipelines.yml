@@ -1,5 +1,5 @@
 trigger:
-- main   # or your branch
+- azure-pipelines-test   # or your branch
 
 pool:
   vmImage: ubuntu-latest
