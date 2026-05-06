@@ -1,22 +1,83 @@
-trigger:
-- azure-pipelines-test   # or your branch
-
+```yaml
+# Use a Microsoft-hosted Ubuntu agent
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- checkout: self
+# -----------------------------
+# STAGES
+# -----------------------------
+stages:
 
-# Optional build step (skip if pure static HTML)
-- script: |
-    echo "No build step needed"
-  displayName: "Build step"
+# =============================
+# 1. BUILD STAGE
+# =============================
+- stage: Build
+  displayName: "Build Stage"
 
-# Deploy step
-- task: AzureStaticWebApp@0
-  displayName: "Deploy to Azure Static Web App"
-  inputs:
-    app_location: "/"              # where your site lives
-    output_location: ""            # leave empty if no build output
-    api_location: ""               # leave empty unless using API
-    azure_static_web_apps_api_token: $(deployment_token)
+  jobs:
+  - job: BuildJob
+    displayName: "Build Website"
+
+    steps:
+    # Pull your repo code
+    - checkout: self
+
+    # Example build step
+    # For a plain HTML site, this is basically a no-op
+    # Replace this later if you use React/Vue/etc.
+    - script: |
+        echo "Building static site..."
+        mkdir -p $(Build.ArtifactStagingDirectory)
+        cp -r * $(Build.ArtifactStagingDirectory)
+      displayName: "Prepare files for deployment"
+
+    # Publish files as an artifact so the next stage can use them
+    - task: PublishBuildArtifacts@1
+      displayName: "Publish Build Artifacts"
+      inputs:
+        PathtoPublish: "$(Build.ArtifactStagingDirectory)"
+        ArtifactName: "site"
+        publishLocation: "Container"
+
+
+# =============================
+# 2. DEPLOY STAGE
+# =============================
+- stage: Deploy
+  displayName: "Deploy Stage"
+  dependsOn: Build   # ensures build runs first
+
+  jobs:
+  - deployment: DeployStaticSite
+    displayName: "Deploy to Azure Static Web App"
+
+    # 👇 This connects to Environments tab
+    environment: dev
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          # Download the artifact produced in the Build stage
+          - task: DownloadBuildArtifacts@0
+            displayName: "Download Build Artifacts"
+            inputs:
+              buildType: "current"
+              downloadType: "single"
+              artifactName: "site"
+              downloadPath: "$(System.ArtifactsDirectory)"
+
+          # Deploy to Azure Static Web Apps
+          - task: AzureStaticWebApp@0
+            displayName: "Deploy to Azure Static Web App"
+            inputs:
+              # Point to downloaded artifact
+              app_location: "$(System.ArtifactsDirectory)/site"
+
+              output_location: ""
+              api_location: ""
+
+              # Secret token from Azure
+              azure_static_web_apps_api_token: $(deployment_token)
+```
