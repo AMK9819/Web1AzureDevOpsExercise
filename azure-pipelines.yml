@@ -11,15 +11,11 @@ stages:
   - job: BuildJob
     steps:
     - checkout: self
-    - script: |
-        npm install
-        npm run build
-      displayName: 'Install and Build'
     
     # Publish the build output as an artifact
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: 'dist' # Change this to your build folder (dist, build, out)
+        PathtoPublish: '.' # Change this to your build folder (dist, build, out)
         ArtifactName: 'drop'
         publishLocation: 'Container'
 
