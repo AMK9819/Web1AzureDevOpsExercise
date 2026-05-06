@@ -4,15 +4,13 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- checkout: self
-
 stages:
 - stage: Build
   displayName: 'Build Static Site'
   jobs:
   - job: BuildJob
     steps:
+    - checkout: self
     - script: |
         npm install
         npm run build
