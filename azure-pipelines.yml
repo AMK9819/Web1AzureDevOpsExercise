@@ -22,7 +22,7 @@ stages:
 
 - stage: DeployDev
   displayName: 'Deploy to Dev'
-  condition: eq(variables['Build.SourceBranch'], 'refs/heads/dev')
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/azure-pipelines-test')
   dependsOn: Build
   jobs:
   - deployment: DeployDevJob
