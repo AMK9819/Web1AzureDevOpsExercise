@@ -1,19 +1,22 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- azure-pipelines-test
+- main   # or your branch
 
 pool:
   vmImage: ubuntu-latest
 
 steps:
-- script: echo "Building from GitHub repo!"
-  displayName: "Simple build step"
+- checkout: self
 
+# Optional build step (skip if pure static HTML)
 - script: |
-    echo "Listing files:"
-    ls -R
-  displayName: "Show repo contents"
+    echo "No build step needed"
+  displayName: "Build step"
+
+# Deploy step
+- task: AzureStaticWebApp@0
+  displayName: "Deploy to Azure Static Web App"
+  inputs:
+    app_location: "/"              # where your site lives
+    output_location: ""            # leave empty if no build output
+    api_location: ""               # leave empty unless using API
+    azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN)
