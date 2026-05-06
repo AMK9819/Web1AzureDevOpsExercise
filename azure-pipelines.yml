@@ -4,40 +4,40 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+stages:
 - stage: Build
+  displayName: 'Build Static Site'
   jobs:
-  - job: PackageJob
+  - job: BuildJob
     steps:
     - checkout: self
-    - task: CopyFiles@2
-      inputs:
-        SourceFolder: '$(Build.SourcesDirectory)'
-        Contents: '**'
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    
+    # Publish the build output as an artifact
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'www'
+        PathtoPublish: '.' # Change this to your build folder (dist, build, out)
+        ArtifactName: 'drop'
         publishLocation: 'Container'
 
 
 - stage: DeployDev
+  displayName: 'Deploy to Dev'
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/dev')
+  dependsOn: Build
   jobs:
   - deployment: DeployDevJob
-    environment: 'development'
+    environment: 'dev'
     strategy:
       runOnce:
         deploy:
           steps:
           - download: current
-            artifact: www
-          - task: AzureStaticWebApp@0
+            artifact: drop
+          - task: AzureStaticWebApp@0 # For Azure Static Web Apps
             inputs:
-              # Point this to the folder created by the 'download' step
-              app_location: 'www' 
-              # This prevents the task from searching for a package.json/build script
-              skip_app_build: true 
+              app_location: "/"
               azure_static_web_apps_api_token: $(deployment_token)
+
 
 
 # Deploy step
