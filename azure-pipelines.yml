@@ -1,4 +1,7 @@
-```yaml
+
+
+trigger:
+- azure-pipelines-test
 # Use a Microsoft-hosted Ubuntu agent
 pool:
   vmImage: ubuntu-latest
