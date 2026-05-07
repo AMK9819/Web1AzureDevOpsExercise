@@ -1,43 +1,43 @@
 trigger:
-- azure-pipelines-test
+- azure-pipelines-test # What branch to trigger the pipeline on
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: ubuntu-latest # Machine that will execute steps
 
-stages:
+stages:                  # stage and job, organizes work into a build with job, BuildJob
 - stage: Build
   displayName: 'Build Static Site'
   jobs:
   - job: BuildJob
     steps:
-    - checkout: self
+    - checkout: self    # Checkout the code from the repo
     
 
-    - task: PublishBuildArtifacts@1
+    - task: PublishBuildArtifacts@1   # takes files from build machine and uploads them to Azure DevOps to be used later
       inputs:
-        PathtoPublish: '.' 
-        ArtifactName: 'drop'
+        PathtoPublish: '.'  # specifies which folder to upload, in this case it is "." being root
+        ArtifactName: 'drop' # package name
         publishLocation: 'Container'
 
 - stage: DeployDev
   displayName: 'Deploy to Dev'
-  condition: eq(variables['Build.SourceBranch'], 'refs/heads/azure-pipelines-test')
-  dependsOn: Build
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/azure-pipelines-test') # ensures stage only runs if code is from azure-pipelines-test branch
+  dependsOn: Build #deployment won't start until build stage is complete
   jobs:
   - deployment: DeployDevJob
-    environment: 'dev'
+    environment: 'dev' # deploy to dev environment
     strategy:
       runOnce:
         deploy:
           steps:
-          - download: current
+          - download: current # grabs the artifact from the build stage
             artifact: drop
           
-          - task: AzureStaticWebApp@0
+          - task: AzureStaticWebApp@0 #push files to Azure Static Web App
             inputs:
-              app_location: "."
+              app_location: "." #files are in root
 
               # This tells Azure: "Don't try to compile anything, just take the files"
-              skip_app_build: true 
-              azure_static_web_apps_api_token: $(deployment_token)
-              workingDirectory: '$(Pipeline.Workspace)/drop'
+              skip_app_build: true # skips the build step, since we are just deploying static files
+              azure_static_web_apps_api_token: $(deployment_token) #secret token to authenticate with Azure Static Web App
+              workingDirectory: '$(Pipeline.Workspace)/drop' # move into folder where files were downloaded before it begins to upload
