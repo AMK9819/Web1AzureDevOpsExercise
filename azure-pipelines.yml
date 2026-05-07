@@ -35,7 +35,7 @@ stages:
           
           - task: AzureStaticWebApp@0
             inputs:
-              app_location: "/"
+              app_location: "drop"
               # This tells Azure: "Don't try to compile anything, just take the files"
               skip_app_build: true 
               azure_static_web_apps_api_token: $(deployment_token)
