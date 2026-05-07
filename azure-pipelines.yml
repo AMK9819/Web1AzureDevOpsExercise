@@ -1,5 +1,5 @@
 trigger:
-- azure-pipelines-test   # or your branch
+- azure-pipelines-test
 
 pool:
   vmImage: ubuntu-latest
@@ -12,13 +12,12 @@ stages:
     steps:
     - checkout: self
     
-    # Publish the build output as an artifact
+
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '.' # Change this to your build folder (dist, build, out)
+        PathtoPublish: '.' 
         ArtifactName: 'drop'
         publishLocation: 'Container'
-
 
 - stage: DeployDev
   displayName: 'Deploy to Dev'
@@ -33,12 +32,12 @@ stages:
           steps:
           - download: current
             artifact: drop
-          - task: AzureStaticWebApp@0 # For Azure Static Web Apps
+          
+          - task: AzureStaticWebApp@0
             inputs:
-              app_location: "/"
+              app_location: "/" 
+              output_location: "" # Leave this empty since there is no build sub-folder
               azure_static_web_apps_api_token: $(deployment_token)
-
-
 
 # Deploy step
 # - task: AzureStaticWebApp@0
