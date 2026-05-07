@@ -19,12 +19,12 @@ stages:                  # stage and job, organizes work into a build with job, 
         ArtifactName: 'drop' # package name
         publishLocation: 'Container'
 
-- stage: DeployDev
-  displayName: 'Deploy to Dev'
-  condition: eq(variables['Build.SourceBranch'], 'refs/heads/azure-pipelines-test') # ensures stage only runs if code is from azure-pipelines-test branch
+- stage: DeployMaster
+  displayName: 'Deploy to master'
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/master') # ensures stage only runs if code is from azure-pipelines-test branch
   dependsOn: Build #deployment won't start until build stage is complete
   jobs:
-  - deployment: DeployDevJob
+  - deployment: DeployMasterJob
     environment: 'master' # deploy to dev environment
     strategy:
       runOnce:
