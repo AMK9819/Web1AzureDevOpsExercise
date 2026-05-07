@@ -1,19 +1,43 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- main
+- master # What branch to trigger the pipeline on
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: ubuntu-latest # Machine that will execute steps
 
-steps:
-- script: echo "Building from GitHub repo!"
-  displayName: "Simple build step"
+stages:                  # stage and job, organizes work into a build with job, BuildJob
+- stage: Build
+  displayName: 'Build Static Site'
+  jobs:
+  - job: BuildJob
+    steps:
+    - checkout: self    # Checkout the code from the repo
+    
 
-- script: |
-    echo "Listing files:"
-    ls -R
-  displayName: "Show repo contents"
+    - task: PublishBuildArtifacts@1   # takes files from build machine and uploads them to Azure DevOps to be used later
+      inputs:
+        PathtoPublish: '.'  # specifies which folder to upload, in this case it is "." being root
+        ArtifactName: 'drop' # package name
+        publishLocation: 'Container'
+
+- stage: DeployMaster
+  displayName: 'Deploy to master'
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/master') # ensures stage only runs if code is from azure-pipelines-test branch
+  dependsOn: Build #deployment won't start until build stage is complete
+  jobs:
+  - deployment: DeployMasterJob
+    environment: 'master' # deploy to dev environment
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current # grabs the artifact from the build stage
+            artifact: drop
+          
+          - task: AzureStaticWebApp@0 #push files to Azure Static Web App
+            inputs:
+              app_location: "." #files are in root
+
+              # This tells Azure: "Don't try to compile anything, just take the files"
+              skip_app_build: true # skips the build step, since we are just deploying static files
+              azure_static_web_apps_api_token: $(deployment_token) #secret token to authenticate with Azure Static Web App
+              workingDirectory: '$(Pipeline.Workspace)/drop' # move into folder where files were downloaded before it begins to upload
