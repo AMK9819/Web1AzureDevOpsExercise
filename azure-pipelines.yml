@@ -1,5 +1,5 @@
 trigger:
-- azure-pipelines-test # What branch to trigger the pipeline on
+- master # What branch to trigger the pipeline on
 
 pool:
   vmImage: ubuntu-latest # Machine that will execute steps
@@ -25,7 +25,7 @@ stages:                  # stage and job, organizes work into a build with job, 
   dependsOn: Build #deployment won't start until build stage is complete
   jobs:
   - deployment: DeployDevJob
-    environment: 'dev' # deploy to dev environment
+    environment: 'master' # deploy to dev environment
     strategy:
       runOnce:
         deploy:
