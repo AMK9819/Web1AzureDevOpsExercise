@@ -35,15 +35,7 @@ stages:
           
           - task: AzureStaticWebApp@0
             inputs:
-              app_location: "/" 
-              output_location: "" # Leave this empty since there is no build sub-folder
+              app_location: "/"
+              # This tells Azure: "Don't try to compile anything, just take the files"
+              skip_app_build: true 
               azure_static_web_apps_api_token: $(deployment_token)
-
-# Deploy step
-# - task: AzureStaticWebApp@0
-#   displayName: "Deploy to Azure Static Web App"
-#   inputs:
-#     app_location: "/"              where your site lives
-#     output_location: ""            leave empty if no build output
-#     api_location: ""               leave empty unless using API
-#     azure_static_web_apps_api_token: $(deployment_token)
